@@ -67,7 +67,6 @@
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
             <version>${scala.version.minor}</version>
-            <scope>compile</scope>
         </dependency>
 
         <!-- spark -->
@@ -76,28 +75,24 @@
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_${scala.version.major}</artifactId>
             <version>${spark.version}</version>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_${scala.version.major}</artifactId>
             <version>${spark.version}</version>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-streaming_${scala.version.major}</artifactId>
             <version>${spark.version}</version>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql-kafka-0-10_${scala.version.major}</artifactId>
             <version>${spark.version}</version>
-            <scope>compile</scope>
         </dependency>
 
     </dependencies>
