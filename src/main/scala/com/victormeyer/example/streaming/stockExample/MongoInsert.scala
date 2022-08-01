@@ -31,7 +31,9 @@ object MongoInsert {
       .option("kafka.bootstrap.servers", "localhost:9092")
       .option("subscribe", "stock_topic_1")
       .option("includeHeaders", "true")
-      .option("startingOffsets", """{"stock_topic_1":{"0":4000}}""")
+      //.option("startingOffsets", """{"stock_topic_1":{"0":4000}}""") // précise l'offset de depart
+      .option("startingOffsets", "earliest")
+      .option("failOnDataLoss", "true") // lève une erreur en cas de mauvause requete sur un topic
       .load()
 
     df.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)", "headers", "timestamp")
@@ -44,7 +46,7 @@ object MongoInsert {
       .foreachBatch((batchDF: DataFrame, batchId: Long) => {
          println(s"batch id: $batchId")
          val df: DataFrame = deserializeDf(batchDF, stockValueSchema)
-         writeToMongo(df.select("id", "price", "symbol"), Seq())
+         writeToMongo(df.select("id", "price", "symbol"), Seq("id"))
       }
       )
       .start()
@@ -62,6 +64,7 @@ object MongoInsert {
       .option("collection", "stock_photo")
       .save()*/
     val mongoTarget: MongoTarget = new MongoTarget("mongodb://mongo:mongo@localhost:27017/", "test", "stock_photo")(spark)
+    df.show()
     mongoTarget.getExistsMongoRecord(df, keys).show()
 
   }
