@@ -89,10 +89,18 @@
             <version>${spark.version}</version>
         </dependency>
 
+        <!-- spark connector -->
+
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql-kafka-0-10_${scala.version.major}</artifactId>
             <version>${spark.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mongodb.spark</groupId>
+            <artifactId>mongo-spark-connector</artifactId>
+            <version>10.0.3</version>
         </dependency>
 
     </dependencies>
