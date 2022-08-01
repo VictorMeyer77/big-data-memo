@@ -1,7 +1,6 @@
 package com.victormeyer.example.streaming.stockExample
-
-import org.apache.spark.sql.{DataFrame, SparkSession}
-
+import org.apache.spark.sql.types.{ArrayType, BinaryType, StringType, StructField, StructType}
+import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import scala.util.Random
 
 
@@ -13,24 +12,37 @@ object DataGenerator {
 
   val spark: SparkSession = SparkSession
     .builder
-    .master("local[*]")
+    .appName("Stock Data Generator")
     .getOrCreate()
 
-  import spark.implicits._
-
   def createDataframe: DataFrame ={
-    val ids: Seq[Int] = Seq.range(0, 1000, 1)
-    val seqData: Seq[(String, String, Seq[String])] = ids.map(id => {
-      (id.toString, generateRandomData(id), Seq("com.victormeyer.example.streaming.stockExample"))
+    val schema: StructType = StructType(Seq(
+        StructField("key", StringType, nullable=false),
+        StructField("value", StringType, nullable=false),
+        StructField("headers", ArrayType(StructType(Seq(StructField("key", StringType, nullable=false), StructField("value", BinaryType, nullable=false)))))
+      )
+    )
+    val ids: Seq[Int] = Seq.range(0, 10, 1)
+    val seqData: Seq[Row] = ids.map(id => {
+      Row(id.toString, generateRandomData(id), Seq(Row("class", "com.victormeyer.example.streaming.stockExample".getBytes())))
     })
-    seqData.toDF("key", "value", "headers")
+    spark.createDataFrame(spark.sparkContext.parallelize(seqData), schema)
   }
 
   def generateRandomData(id: Int): String ={
     val random: Random = Random
-    val price: Double = random.nextDouble + random.nextInt(100).toDouble
-    val symbol: String = random.nextString(3)
-    s"{\"id\": $id, \"price\": $price, \"symbol\": \"$symbol\"}"
+    val price: String = (random.nextDouble + random.nextInt(100).toDouble).toString.replace(",", ".")
+    val symbol: String = Random.alphanumeric.take(3).mkString.toUpperCase
+    "{\"id\": %d, \"price\": %s, \"symbol\": \"%s\"}".format(id, price, symbol)
+  }
+
+  def writeToKafka(): Unit ={
+    createDataframe
+      .write
+      .format("kafka")
+      .option("kafka.bootstrap.servers", "localhost:9092")
+      .option("topic", "stock_topic_1")
+      .save()
   }
 
 }
