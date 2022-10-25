@@ -16,14 +16,15 @@
         <maven.compiler.target>18</maven.compiler.target>
     </properties>
 
-    <!-- Compilation du projet dans un jar unique avec les dépendences -->
-    <!-- mvn clean compile assembly:single -->
-
     <build>
 
         <sourceDirectory>src/main/scala</sourceDirectory>
+        <testSourceDirectory>src/test/scala</testSourceDirectory>
 
         <plugins>
+
+            <!-- Compilation du projet dans un jar unique avec les dépendences -->
+            <!-- mvn clean compile assembly:single -->
 
             <!-- https://mvnrepository.com/artifact/org.scala-tools/maven-scala-plugin -->
             <plugin>
@@ -54,6 +55,58 @@
                 </configuration>
             </plugin>
 
+            <!-- tests -->
+            <!-- mvn test -->
+
+            <!-- https://www.scalatest.org/user_guide/using_the_scalatest_maven_plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.scalatest</groupId>
+                <artifactId>scalatest-maven-plugin</artifactId>
+                <version>2.2.0</version>
+                <configuration>
+                    <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+                    <junitxml>.</junitxml>
+                    <filereports>WDF TestSuite.txt</filereports>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>test</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>scala-maven-plugin</artifactId>
+                <version>4.5.3</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>testCompile</goal>
+                        </goals>
+                        <configuration>
+                            <args>
+                                <arg>-dependencyfile</arg>
+                                <arg>${project.build.directory}/.scala_dependencies</arg>
+                            </args>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
 
     </build>
@@ -67,6 +120,13 @@
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
             <version>${scala.version.minor}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest_${scala.version.major}</artifactId>
+            <version>3.1.2</version>
+            <scope>test</scope>
         </dependency>
 
         <!-- spark -->
@@ -86,6 +146,12 @@
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-streaming_${scala.version.major}</artifactId>
+            <version>${spark.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-avro_${scala.version.major}</artifactId>
             <version>${spark.version}</version>
         </dependency>
 
